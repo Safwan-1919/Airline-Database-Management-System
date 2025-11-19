@@ -1,0 +1,72 @@
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ddd;
+}
+.header-title h2 {
+    margin: 0;
+}
+.search-info {
+    display: flex;
+    align-items: center;
+}
+.search-box {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+.search-box input {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.main-content h1 {
+    margin-top: 0;
+}
+.main-content form {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.main-content form input,
+.main-content form button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.main-content form button {
+    background-color: #E84545;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.main-content form button:hover {
+    background-color: #E84545;
+}
+#bookings-list {
+    margin-top: 20px;
+}
+#bookings-list div {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+#bookings-list button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#bookings-list button:hover {
+    background-color: #c82333;
+}

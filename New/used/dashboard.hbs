@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="/images/logo1.png" alt="logo">
+        </div>
+        {{!-- <div class="sidebar-nav"> --}}
+            <ul class="menu">
+                <li class="active">
+                    <a href="/dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
+                </li>
+                <li>
+                    <a href="/customer-details"><i class="fa-solid fa-user"></i><span>User</span></a>
+                </li>
+                <li>
+                    <a href="/booking"><i class="fa-solid fa-plane"></i><span>Book</span></a>
+                </li>
+                <li>
+                    <a href="/cancellation"><i class="fa-solid fa-ban"></i><span>Cancel</span></a>
+                </li>
+                <li>
+                    <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
+                </li>
+                <li class="logout">
+                    <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+                </li>
+            </ul>
+        {{!-- </div> --}}
+    </div>
+    <div class="main-content">
+        <div class="header-main">
+        <div class="header-title">
+            <h2>Dashboard</h2>
+        </div>
+        <div class="search-info">
+            <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search">
+            </div>
+            <img src="/images/user.jpg" alt="user">
+        </div>
+        </div>
+        <div>
+        {{#if message}}
+            <p class="messageType" id="message"><i class="fa-solid fa-circle-check"></i> {{message}}</p>
+        {{/if}}
+        </div>
+        <div class="dashboard-section">
+            <div class="dashboard-counter">
+                <div class="main-counter">
+                <div class="left-counter">
+                    <h1>1</h1>
+                    <p>USED</p>
+                    </div>
+                    <div class="right-counter">
+                        <p>HH</p>
+                    </div>
+                </div>
+                <div class="down-counter">
+                    <div class="left-cancel-counter">
+                        <p>Cancelled: 1</p>
+                    </div>
+                    <div class="right-transaction-counter">
+                        <p>Transaction: $1000</p>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-weather">
+
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            if ($('#message').length) {
+                setTimeout(function() {
+                    $('#message').fadeOut('slow');
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

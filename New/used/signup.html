@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="public/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <img src="images/logo.png" alt="logo">
+        </div>
+        <nav>
+            <ul>
+                <div class="middle-nav">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#">Contact</a></li>
+                </div>
+                <div class="right-nav">
+                    <li><a href="#" id="nav-btn">Login</a></li>
+                    <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i></a></li>
+                </div>
+            </ul>
+        </nav>
+    </header>
+    <main class="signup-container">
+        <div class="signup-box">
+            <form action="/signup" method="post">
+                <h2>Sign Up</h2>
+                <div class="form-group">
+                    <input type="username" name="username" id="username" class="signup-input" required>
+                    <i class="fa-solid fa-user sign-icon"></i>
+                    <label for="username" >Username</label>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" id="email"  class="signup-input" required>
+                    <i class="fa-solid fa-envelope sign-icon"></i>
+                    <label for="email">Email</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" id="password"  class="signup-input" required>
+                    <i class="fa-solid fa-lock sign-icon"></i>
+                    <label for="password">Password</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" id="password"
+                    class="signup-input" required>
+                    <i class="fa-solid fa-lock sign-icon"></i>
+                    <label for="password">Confirm Password</label>
+                </div>
+                <button class="signup-btn" type="submit">Sign Up</button>
+                <div class="accountcheck1">
+                    <p>You already have an account? <a href="">Sign in</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

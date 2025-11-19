@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Booking</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="/cancellation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="/images/logo1.png" alt="logo">
+        </div>
+        {{!-- <div class="sidebar-nav"> --}}
+            <ul class="menu">
+                <li>
+                    <a href="/dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
+                </li>
+                <li>
+                    <a href="/customer-details"><i class="fa-solid fa-user"></i><span>User</span></a>
+                </li>
+                <li>
+                    <a href="/booking"><i class="fa-solid fa-plane"></i><span>Book</span></a>
+                </li>
+                <li class="active">
+                    <a href="/cancellation"><i class="fa-solid fa-ban"></i><span>Cancel</span></a>
+                </li>
+                <li>
+                    <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
+                </li>
+                <li class="logout">
+                    <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+                </li>
+            </ul>
+        {{!-- </div> --}}
+    </div>
+    <div class="main-content">
+        <div class="header-main">
+        <div class="header-title">
+            <h2>Dashboard</h2>
+        </div>
+        <div class="search-info">
+            <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search">
+            </div>
+            <img src="/images/user.jpg" alt="user">
+        </div>
+        </div>
+    <h1>Cancel Booking</h1>
+
+    <!-- Cancel by Booking Number -->
+    <h2>Cancel by Booking Number</h2>
+    <form id="cancel-by-number-form">
+        <input type="text" name="bookingNumber" placeholder="Enter Booking Number" required>
+        <button type="submit">Cancel Booking</button>
+    </form>
+
+    <!-- Find and Cancel Bookings by Customer ID -->
+    <h2>Find and Cancel Bookings by Customer ID</h2>
+    <form id="find-bookings-form">
+        <input type="text" name="customerId" placeholder="Enter Customer ID" required>
+        <button type="submit">Find Bookings</button>
+    </form>
+
+    <div id="bookings-list"></div>
+
+    </div>
+    <script>
+        // Handle cancel by booking number
+        document.getElementById('cancel-by-number-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bookingNumber = e.target.bookingNumber.value.trim();
+
+            try {
+                const response = await fetch('/cancel-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingNumber })
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message);
+                    location.reload(); // Reload to update the list of bookings
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('An error occurred while canceling the booking.');
+            }
+        });
+
+        // Handle find and display bookings by customer ID
+        document.getElementById('find-bookings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const customerId = e.target.customerId.value.trim();
+
+            try {
+                const response = await fetch(`/customer-bookings?customerId=${customerId}`, {
+                    method: 'GET'
+                });
+                const bookings = await response.json();
+                
+                if (response.ok) {
+                    const bookingsList = document.getElementById('bookings-list');
+                    bookingsList.innerHTML = '<h3>Your Bookings</h3>';
+
+                    bookings.forEach(booking => {
+                        bookingsList.innerHTML += `
+                            <div>
+                                <p>Flight Number: ${booking.flightNumber}</p>
+                                <p>Departure: ${booking.departure}</p>
+                                <p>Arrival: ${booking.arrival}</p>
+                                <p>Departure Date: ${booking.departureDate}</p>
+                                <p>Seat Number: ${booking.seatNumber}</p>
+                                <button onclick="cancelBooking('${booking._id}')">Cancel Booking</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    document.getElementById('bookings-list').innerHTML = '<p>No bookings found.</p>';
+                }
+            } catch (error) {
+                alert('An error occurred while fetching bookings.');
+            }
+        });
+
+        // Handle cancel booking by booking ID
+        async function cancelBooking(bookingId) {
+            try {
+                const response = await fetch('/cancel-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingNumber: bookingId })
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message);
+                    location.reload(); // Reload to update the list of bookings
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('An error occurred while canceling the booking.');
+            }
+        }
+    </script>
+</body>
+</html>

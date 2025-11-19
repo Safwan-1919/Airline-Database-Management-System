@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="customer-page">
+        <div class="customer-box">
+            <h2>Enter Your Details</h2>
+            <form action="">
+
+                <fieldset>
+                    <legend>Personal Information</legend>
+                        <div class="customer-name">
+
+                        <label for="firstname">Name:</label>
+                        <input type="text" name="firstname" id="firstname" placeholder="First">
+                        <input type="text" name="lastname" id="lastname" placeholder="Last">
+                    </div>
+                    <div class="customer-gender">
+                        <label>
+                            <input type="radio" id="male" name="gender" value="male" required>
+                            Male
+                        </label>
+                        <label>
+                            <input type="radio" id="female" name="gender" value="female">
+                            Female
+                        </label>
+                    </div>
+                    <div class="customer-dob">
+                        <label for="dob">Date of Birth:</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+                    <label for="aadharNumber">Aadhar Number:</label>
+                    <input type="text" id="aadharNumber" name="aadharNumber" pattern="\d{12}" maxlength="12" required>
+                    <small>12 digits</small>
+                </fieldset>
+                <fieldset>
+                    <legend>Contact Information</legend>
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required>
+                </fieldset>
+                <fieldset>
+                    <legend>Address</legend>
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <input type="text" id="address" name="address" required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="state">State:</label>
+                        <input type="text" id="state" name="state" required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="zip">Zip Code:</label>
+                        <input type="text" id="zip" name="zip" required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="country">Country:</label>
+                        <input type="text" id="country" name="country" required>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Passport Details</legend>
+                    <div class="form-group">
+                        <label for="passportNumber">Passport Number:</label>
+                        <input type="text" id="passportNumber" name="passportNumber">
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="passportExpiry">Passport Expiry Date:</label>
+                        <input type="date" id="passportExpiry" name="passportExpiry">
+                    </div>
+                </fieldset>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="agree" name="agree" required>
+                        I agree to the <a href="/terms">terms and conditions</a>.
+                    </label>
+                </div>
+    
+                <button type="submit">Save Details</button>
+            </form>
+            </div>
+    </div>
+</body>
+</html>

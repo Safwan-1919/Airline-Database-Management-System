@@ -5,7 +5,7 @@ const hbs = require("hbs")
 const { collection, Customer, Booking, History } = require("./mongodb");
 // const Customer = require("./mongodb")
 const templatePath = path.join(__dirname,"../templates")
-const partialsPath = path.join(__dirname, "../templates/partials") 
+
 const moment = require('moment'); 
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
@@ -21,8 +21,6 @@ app.use(express.static(path.join(__dirname, "../public")));
 hbs.registerHelper("formatDate", function (date) {
     return moment(date).format("YYYY-MM-DD HH:mm:ss");
   });
-
-hbs.registerPartials(partialsPath)
 
 const logActivity = async (activity) => {
     try {
@@ -46,7 +44,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/dashboard", (req, res) => {
-    res.render("dashboard", { title: "Dashboard" });
+    res.render("dashboard");
 });
 
 app.get("/customer-details", (req, res) => {
@@ -119,11 +117,9 @@ app.post("/customer-details", async (req, res) => {
 
 const countries = ["USA", "Canada", "India", "UK", "Australia", "Germany", "France"];
 
-app.get("/booking", (req, res) => {
-  res.render("booking", { pageTitle: "Booking" });
+app.get('/booking', (req, res) => {
+    res.render('booking', { countries });
 });
-
-
 
 
 
@@ -175,7 +171,6 @@ const flightSeats = {
     'LH456': 50,
     'AA789': 75
 };
-
 
 app.post("/booking", async (req, res) => {
     const { customerId, flightNumber, departure, arrival, departureDate, seatNumber, class: travelClass } = req.body;

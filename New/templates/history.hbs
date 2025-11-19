@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History</title>
+    <style>
+        .history-main{
+            padding-left: 30px;
+        }
+        .history-h1 {
+            color: #333;
+        }
+        .history-ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .history-li {
+            background: #f4f4f4;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="/images/logo1.png" alt="logo">
+        </div>
+        {{!-- <div class="sidebar-nav"> --}}
+            <ul class="menu">
+                <li class="active">
+                    <a href="/dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
+                </li>
+                <li>
+                    <a href="/customer-details"><i class="fa-solid fa-user"></i><span>User</span></a>
+                </li>
+                <li>
+                    <a href="/booking"><i class="fa-solid fa-plane"></i><span>Book</span></a>
+                </li>
+                <li>
+                    <a href="/cancellation"><i class="fa-solid fa-ban"></i><span>Cancel</span></a>
+                </li>
+                <li>
+                    <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
+                </li>
+                <li class="logout">
+                    <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+                </li>
+            </ul>
+        {{!-- </div> --}}
+    </div>
+    <div class="main-content">
+        <div class="header-main">
+        <div class="header-title">
+            <h2>Dashboard</h2>
+        </div>
+        <div class="search-info">
+            <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search">
+            </div>
+            <img src="/images/user.jpg" alt="user">
+        </div>
+        </div>
+    <div class="history-main">
+    <h1 class="history-h1">Activity History</h1>
+    {{#if activities.length}}
+        <ul class="history-ul">
+            {{#each activities}}
+                <li class="history-li">{{this.activity}} - {{formatDate this.timestamp}}</li>
+            {{/each}}
+        </ul>
+    {{else}}
+        <p class="history-p">No history available.</p>
+    {{/if}}
+    </div>
+    </div>
+</body>
+</html>
