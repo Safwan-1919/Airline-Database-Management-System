@@ -1,0 +1,187 @@
+/* The styles for .profile-page, .profile-box, and form elements within remain */
+.profile-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+}
+
+.profile-box {
+    background: rgba(255, 218, 218, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.profile-box h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    color: #333;
+}
+
+.profile-box form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+fieldset {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    background-color: #fafafa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+legend {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #E84545;
+}
+
+.form-group {
+    position: relative;
+    margin: 25px 0; /* Adjust margin as needed */
+}
+
+.form-group label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #999;
+    pointer-events: none;
+    transition: all .5s ease;
+}
+
+input[type="email"]:disabled~label {
+    top: -5px;
+    font-size: 0.8rem;
+    background-color: #fafafa; /* Match fieldset background */
+    padding: 0 0.2rem;
+    color: #666; /* Slightly darker for disabled */
+}
+
+.form-group input:focus~label,
+.form-group input:valid~label {
+    top: -5px;
+    font-size: 0.8rem;
+    background-color: #fafafa; /* Match fieldset background */
+    padding: 0 0.2rem;
+}
+
+.profile-box input[type="text"],
+.profile-box input[type="email"],
+.profile-box input[type="date"],
+.profile-box input[type="tel"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.profile-box input[type="text"]:focus,
+.profile-box input[type="email"]:focus,
+.profile-box input[type="date"]:focus,
+.profile-box input[type="tel"]:focus {
+    outline: none;
+    border-color: #E84545;
+    box-shadow: 0 0 5px rgba(232, 69, 69, 0.5);
+}
+
+.profile-box input:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+.profile-box button[type="submit"] {
+    padding: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #E84545;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+    width: 100%;
+}
+
+.profile-box button[type="submit"]:hover {
+    background-color: #d43535;
+}
+
+.bookings-history {
+    margin-top: 2rem;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 2rem;
+}
+
+.bookings-history h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.bookings-history table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.bookings-history th, .bookings-history td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.bookings-history th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+}
+
+.bookings-history tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.no-bookings {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.btn-check-in, .btn-view-pass {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-check-in {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.btn-view-pass {
+    background-color: #337ab7;
+    color: white;
+}
+

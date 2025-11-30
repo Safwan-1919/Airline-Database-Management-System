@@ -1,65 +1,102 @@
-/* .main-content {
-    margin-left: 220px; /* Adjust this value based on sidebar width */
-    /* padding: 20px; */
-/* } */
-
-.header-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #f4f4f4;
-    border-bottom: 1px solid #ddd;
-}
 .booking-page {
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem;
 }
-.booking-box h2 {
-    margin-top: 0;
+
+.booking-box {
+    background: rgba(255, 218, 218, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 2rem;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
+.booking-box h2, .booking-box h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
 .booking-box form {
-    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
 }
+
+.booking-box fieldset {
+    grid-column: 1 / -1;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.2rem;
+    background-color: #fafafa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
 .booking-box label {
     display: block;
-    margin: 10px 0 5px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
+
 .booking-box input, 
 .booking-box select {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
 }
+
+.booking-box input:focus, 
+.booking-box select:focus {
+    outline: none;
+    border-color: #E84545;
+    box-shadow: 0 0 5px rgba(232, 69, 69, 0.5);
+}
+
 .booking-box button {
-    background-color: #E84545;
-    color: white;
+    grid-column: 1 / -1;
+    padding: 0.9rem;
     border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
+    border-radius: 6px;
+    background-color: #E84545;
+    color: #fff;
+    font-size: 1rem;
     cursor: pointer;
+    transition: 0.3s ease;
 }
+
 .booking-box button:hover {
-    background-color: #0056b3;
+    background-color: #d43535;
 }
+
+#flights-container {
+    grid-column: 1 / -1;
+}
+
 .flight-option {
     cursor: pointer;
     padding: 10px;
     border: 1px solid #ccc;
     margin: 5px 0;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
+
 .flight-option:hover {
     background-color: #f0f0f0;
+    transform: scale(1.02);
 }
+
 .modal {
     display: none; 
     position: fixed; 
-    z-index: 1; 
+    z-index: 1000; 
     left: 0;
     top: 0;
     width: 100%; 
@@ -67,22 +104,154 @@
     overflow: auto; 
     background-color: rgba(0,0,0,0.4); 
 }
+
 .modal-content {
     background-color: #fefefe;
     margin: 15% auto; 
     padding: 20px;
     border: 1px solid #888;
     width: 80%; 
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    text-align: center;
 }
+
 .close {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
 }
+
 .close:hover,
 .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+.booking-box table {
+    width: 100%;
+    border-collapse: collapse; /* Ensure borders are merged */
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: #fff; /* White background for tables */
+    border-radius: 8px;
+    overflow: hidden; /* Ensures border-radius applies to table */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.booking-box th,
+.booking-box td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee; /* Light separator */
+}
+
+.booking-box th {
+    background-color: #f8f8f8; /* Slightly different background for headers */
+    font-weight: 600;
+    color: #333;
+}
+
+.booking-box tr:last-child td {
+    border-bottom: none; /* No border on last row */
+}
+
+.booking-box tbody tr:hover {
+    background-color: #f5f5f5; /* Subtle hover effect */
+}
+
+/* Seat Map Styles */
+#seat-map-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    grid-column: 1 / -1; /* Make it span both columns */
+}
+
+.seat-map {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 3 seats, 1 aisle, 3 seats */
+    gap: 10px;
+    justify-items: center;
+    padding: 1rem;
+}
+
+.seat-row {
+    display: contents; /* Allows seats to be direct children of the grid */
+}
+
+.seat {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.seat.available {
+    background-color: #5cb85c; /* Green */
+}
+
+.seat.available:hover {
+    transform: scale(1.1);
+    background-color: #4cae4c;
+}
+
+.seat.booked {
+    background-color: #ccc;
+    cursor: not-allowed;
+    filter: blur(1px);
+}
+
+.seat.selected {
+    background-color: #f0ad4e; /* Orange */
+    transform: scale(1.15);
+    box-shadow: 0 0 10px rgba(240, 173, 78, 0.8);
+}
+
+.seat.aisle {
+    visibility: hidden; /* This is just a spacer */
+}
+
+#select-seat-btn[disabled] {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+/* Autocomplete Styles */
+.autocomplete-container {
+    position: relative;
+}
+
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    border: 1px solid #ccc;
+    border-top: none;
+    background-color: #fff;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.autocomplete-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.autocomplete-item:hover {
+    background-color: #f0f0f0;
 }

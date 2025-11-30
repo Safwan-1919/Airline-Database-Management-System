@@ -4,69 +4,80 @@
     margin-bottom: 1rem;
 }
 
-/* Ensure the main content doesn't overlap with the header */
-/* Keep your sidebar and navbar untouched */
 
-/* Main content */
-.main-content {
-    position: relative;
-    background: #fff;
-    width: calc(100% - 116px);
-}
 
-/* Page wrapper */
 .customer-page {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
-    padding: 2rem 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
-/* Customer box takes full available width */
 .customer-box {
-    background: rgba(255, 218, 218, 0.4); /* semi-transparent tint */
-    backdrop-filter: blur(12px); /* glass blur effect */
+    background: rgba(255, 218, 218, 0.4);
+    backdrop-filter: blur(12px);
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     padding: 2rem;
-    /* max-width: 900px; */
     width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.4);
+    margin: 1rem;
 }
 
-
-/* Form fills the full width */
 .customer-box form {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1.5rem;
 }
 
-/* Fieldset uses full width */
 fieldset {
     border: 1px solid #e0e0e0;
     border-radius: 10px;
-    padding: 1.2rem;
+    padding: 1.5rem;
     background-color: #fafafa;
-    width: 100%;
-    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Inputs stretch full width */
-input[type="text"], 
-input[type="email"], 
-input[type="date"], 
-input[type="tel"] {
-    width: 100%;   /* now matches navbar/main content width */
+legend {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+}
+
+.customer-box input[type="text"], 
+.customer-box input[type="email"], 
+.customer-box input[type="date"], 
+.customer-box input[type="tel"] {
+    width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 0.95rem;
     box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
-/* Name fields side by side */
+.customer-box input[type="text"]:focus, 
+.customer-box input[type="email"]:focus, 
+.customer-box input[type="date"]:focus, 
+.customer-box input[type="tel"]:focus {
+    outline: none;
+    border-color: #E84545;
+    box-shadow: 0 0 5px rgba(232, 69, 69, 0.5);
+}
+
 .customer-name {
     display: flex;
     gap: 1rem;
@@ -75,15 +86,13 @@ input[type="tel"] {
     flex: 1;
 }
 
-/* Gender radio inline */
 .customer-gender {
     display: flex;
     gap: 2rem;
     align-items: center;
 }
 
-/* Button full width like inputs */
-button {
+.customer-box button {
     padding: 0.9rem;
     border: none;
     border-radius: 6px;
@@ -92,15 +101,13 @@ button {
     font-size: 1rem;
     cursor: pointer;
     transition: 0.3s ease;
-    width: 100%;   /* button spans full width */
+    width: 100%;
 }
 
-button:hover {
+.customer-box button:hover {
     background-color: #d43535;
 }
 
-
-/* Success message */
 .message-success {
     color: green;
     font-weight: bold;
@@ -108,7 +115,12 @@ button:hover {
     text-align: center;
 }
 
-/* Responsive tweaks */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 @media (max-width: 768px) {
     .customer-name {
         flex-direction: column;

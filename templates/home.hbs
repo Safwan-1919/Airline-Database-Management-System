@@ -13,23 +13,7 @@
         <div></div>
     </div>
     <div class="content">
-        <header class="navbar">
-            <div class="logo">
-                <img src="images/logo.png" alt="logo">
-            </div>
-            <nav>
-                <ul>
-                    <div class="middle-nav">
-                        <li><a href="/">Home</a></li>
-                        <li><a href="#">Contact</a></li>
-                    </div>
-                    <div class="right-nav">
-                        <li><a href="/login" id="nav-btn">Login</a></li>
-                        <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i></a></li>
-                    </div>
-                </ul>
-            </nav>
-        </header>
+        {{> navbar}}
         <div class="message-included">
             {{#if message}}
                     <p class="messageType" id="message"><i class="fa-solid fa-circle-check"></i> {{message}}</p>
@@ -37,9 +21,7 @@
         <main class="home-container">
             <div class="home-left">
                 <h1>Fly with ease,<br>book with confidence –<br>your adventure starts here!</h1>
-                <button class="home-btn" type="submit">
-                    <a href="/signup">Register Here</a><i class="fa-solid fa-arrow-right"></i>
-                </button>
+                <a href="/signup" class="home-btn">Register Here <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             <div class="home-right">
                 <img class="active" src="/images/aero1.png" alt="Aero Image" id="aero-image-1">

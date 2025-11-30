@@ -7,36 +7,14 @@
   <link rel="stylesheet" href="/dashboard.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="logo">
-      <img src="/images/logo1.png" alt="logo">
-    </div>
-    <ul class="menu">
-      <li class="active"><a href="/dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a></li>
-      <li><a href="/customer-details"><i class="fa-solid fa-user"></i><span>User</span></a></li>
-      <li><a href="/booking"><i class="fa-solid fa-plane"></i><span>Book</span></a></li>
-      <li><a href="/cancellation"><i class="fa-solid fa-ban"></i><span>Cancel</span></a></li>
-      <li><a href="/history"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a></li>
-      <li class="logout"><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
-    </ul>
-  </div>
+  {{> sidebar }}
 
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Header -->
-    <div class="header-main">
-      <div class="header-title"><h2>Dashboard</h2></div>
-      <div class="search-info">
-        <div class="search-box">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Search">
-        </div>
-        <img src="/images/user.jpg" alt="user">
-      </div>
-    </div>
+    {{>header pageTitle="Dashboard"}}
 
     <!-- Flash Message -->
     {{#if message}}
@@ -50,42 +28,228 @@
         <div class="card">
           <i class="fa-solid fa-plane-up"></i>
           <h3>Flights Booked</h3>
-          <p>12</p>
+          <p id="flights-booked">{{flightsBooked}}</p>
         </div>
         <div class="card">
           <i class="fa-solid fa-clock"></i>
           <h3>Upcoming Flights</h3>
-          <p>3</p>
+          <p id="upcoming-flights">{{upcomingFlights}}</p>
         </div>
         <div class="card">
           <i class="fa-solid fa-dollar-sign"></i>
           <h3>Total Spent</h3>
-          <p>$1200</p>
+          <p id="total-spent">${{totalSpent}}</p>
         </div>
         <div class="card">
           <i class="fa-solid fa-ban"></i>
           <h3>Cancellations</h3>
-          <p>1</p>
+          <p id="cancellations">{{cancellations}}</p>
+        </div>
+        <div class="card">
+          <i class="fa-solid fa-users"></i>
+          <h3>Active Users</h3>
+          <p id="active-users">{{activeUsers}}</p>
+        </div>
+        <div class="card">
+          <i class="fa-solid fa-chart-pie"></i>
+          <h3>Revenue</h3>
+          <p id="revenue">${{revenue}}</p>
         </div>
       </div>
 
-      <!-- Weather / Extra Section -->
-      <div class="dashboard-weather">
-        <h3>Weather Info</h3>
-        <div class="weather-box">
-          <i class="fa-solid fa-sun"></i>
-          <p>28°C, Sunny</p>
+      <!-- Middle Section -->
+      <div class="dashboard-middle">
+        <!-- Chart -->
+        <div class="dashboard-chart">
+          <h3>Flights per Month</h3>
+          <canvas id="flightsChart"></canvas>
         </div>
+        <!-- Server Status -->
+        <div class="dashboard-status">
+          <h3>Server Status</h3>
+          <div class="status-box">
+            <i id="status-icon" class="fa-solid fa-circle-check"></i>
+            <p id="status-text">OK</p>
+          </div>
+        </div>
+        <!-- Weather -->
+        <div class="dashboard-weather">
+          <h3>Weather Info</h3>
+          <div class="weather-box">
+            <i id="weather-icon" class="fa-solid fa-sun"></i>
+            <p id="weather-info">Loading...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Bookings -->
+      <div class="recent-bookings">
+        <h3>Recent Bookings</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Passenger</th>
+              <th>Flight</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each recentBookings}}
+            <tr>
+              <td>{{this.customerId}}</td>
+              <td>{{this.flightNumber}}</td>
+              <td>{{formatDate this.departureDate}}</td>
+              <td><span class="status confirmed">Confirmed</span></td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     $(document).ready(function() {
       if ($('#message').length) {
         setTimeout(() => $('#message').fadeOut('slow'), 5000);
       }
+
+      const socket = io();
+
+      // Listen for initial data on connection
+      socket.on('dashboardData', (data) => {
+        updateDashboard(data);
+      });
+
+      // Listen for the signal to refresh data
+      socket.on('dataChanged', () => {
+        fetch('/dashboard-data')
+          .then(response => response.json())
+          .then(data => {
+            updateDashboard(data);
+          });
+      });
+
+      const updateDashboard = (data) => {
+        $('#flights-booked').text(data.flightsBooked);
+        $('#upcoming-flights').text(data.upcomingFlights);
+        $('#total-spent').text('$' + data.totalSpent);
+        $('#cancellations').text(data.cancellations);
+        $('#active-users').text(data.activeUsers);
+        $('#revenue').text('$' + data.revenue);
+        updateRecentBookings(data.recentBookings);
+      };
+
+      const updateRecentBookings = (bookings) => {
+        const tbody = $('.recent-bookings tbody');
+        tbody.empty(); // Clear existing rows
+        if (bookings && bookings.length > 0) {
+            bookings.forEach(booking => {
+                const date = new Date(booking.departureDate).toLocaleDateString();
+                const row = `<tr>
+                    <td>${booking.customerId}</td>
+                    <td>${booking.flightNumber}</td>
+                    <td>${date}</td>
+                    <td><span class="status confirmed">Confirmed</span></td>
+                </tr>`;
+                tbody.append(row);
+            });
+        } else {
+            tbody.append('<tr><td colspan="4">No recent bookings.</td></tr>');
+        }
+      };
+
+      // Fetch and display weather
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            fetch(`/weather?lat=${lat}&lon=${lon}`)
+              .then(response => response.ok ? response.json() : Promise.reject('Failed to fetch'))
+              .then(data => {
+                if (data.error) {
+                  $('#weather-info').text(data.error);
+                  return;
+                }
+                const temp = data.current_weather.temperature;
+                const weatherDescription = getWeatherDescription(data.current_weather.weathercode);
+                $('#weather-info').text(`${Math.round(temp)}°C, ${weatherDescription}`);
+                $('#weather-icon').removeClass().addClass(`fa-solid ${getWeatherIcon(data.current_weather.weathercode)}`);
+              })
+              .catch(() => $('#weather-info').text('Could not fetch weather'));
+          },
+          () => $('#weather-info').text('Geolocation denied')
+        );
+      } else {
+        $('#weather-info').text('Geolocation not supported');
+      }
+
+      function getWeatherDescription(code) {
+        const descriptions = { 0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast', 45: 'Fog', 48: 'Rime fog', 51: 'Light drizzle', 61: 'Slight rain', 80: 'Rain showers', 95: 'Thunderstorm' };
+        return descriptions[code] || 'Unknown';
+      }
+
+      function getWeatherIcon(code) {
+        if (code >= 95) return 'fa-bolt';
+        if (code >= 61) return 'fa-cloud-rain';
+        if (code >= 51) return 'fa-cloud-drizzle';
+        if (code >= 71) return 'fa-snowflake';
+        if (code >= 80) return 'fa-cloud-showers-heavy';
+        if (code >= 45) return 'fa-smog';
+        if (code === 3) return 'fa-cloud';
+        if (code === 2) return 'fa-cloud-sun';
+        return 'fa-sun';
+      }
     });
   </script>
-</body>
-</html>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flightsByClassCtx = document.getElementById('flightsChart');
+        if (flightsByClassCtx) {
+            new Chart(flightsByClassCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [{{#each classLabels}}'{{this}}',{{/each}}],
+                    datasets: [{
+                        label: 'Flights by Class',
+                        data: [{{#each classData}}{{this}},{{/each}}],
+                        backgroundColor: [
+                            'rgba(232, 69, 69, 0.7)',  // Primary Pink/Red
+                            'rgba(255, 140, 140, 0.7)',// Lighter Pink
+                            'rgba(100, 181, 246, 0.7)',// Blue for contrast
+                            'rgba(255, 213, 79, 0.7)', // Yellow Accent
+                            'rgba(144, 202, 249, 0.7)',// Lighter Blue
+                            'rgba(180, 80, 120, 0.7)'  // Deeper Pink
+                        ],
+                        borderColor: [
+                            'rgba(232, 69, 69, 1)',
+                            'rgba(255, 140, 140, 1)',
+                            'rgba(100, 181, 246, 1)',
+                            'rgba(255, 213, 79, 1)',
+                            'rgba(144, 202, 249, 1)',
+                            'rgba(180, 80, 120, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Flights by Class'
+                        }
+                    }
+                }
+            });
+        }
+    });
+  </script>
+

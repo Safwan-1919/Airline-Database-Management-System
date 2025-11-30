@@ -1,0 +1,14 @@
+[
+  { "iata": "LHR", "name": "London Heathrow Airport", "type": "airport", "status": 1, "iso": "GB", "continent": "EU" },
+  { "iata": "LGW", "name": "London Gatwick Airport", "type": "airport", "status": 1, "iso": "GB", "continent": "EU" },
+  { "iata": "STN", "name": "London Stansted Airport", "type": "airport", "status": 1, "iso": "GB", "continent": "EU" },
+  { "iata": "JFK", "name": "John F. Kennedy International Airport", "type": "airport", "status": 1, "iso": "US", "continent": "NA" },
+  { "iata": "LAX", "name": "Los Angeles International Airport", "type": "airport", "status": 1, "iso": "US", "continent": "NA" },
+  { "iata": "SFO", "name": "San Francisco International Airport", "type": "airport", "status": 1, "iso": "US", "continent": "NA" },
+  { "iata": "ORD", "name": "Chicago O'Hare International Airport", "type": "airport", "status": 1, "iso": "US", "continent": "NA" },
+  { "iata": "CDG", "name": "Charles de Gaulle Airport", "type": "airport", "status": 1, "iso": "FR", "continent": "EU" },
+  { "iata": "DXB", "name": "Dubai International Airport", "type": "airport", "status": 1, "iso": "AE", "continent": "AS" },
+  { "iata": "HND", "name": "Tokyo Haneda Airport", "type": "airport", "status": 1, "iso": "JP", "continent": "AS" },
+  { "iata": "BOM", "name": "Chhatrapati Shivaji Maharaj International Airport", "type": "airport", "status": 1, "iso": "IN", "continent": "AS" },
+  { "iata": "DEL", "name": "Indira Gandhi International Airport", "type": "airport", "status": 1, "iso": "IN", "continent": "AS" }
+]

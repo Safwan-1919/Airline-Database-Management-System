@@ -41,11 +41,15 @@
 
 .navbar{
     height: 12vh;
-    /* background-color: aqua; */
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .logo{
@@ -199,36 +203,28 @@ nav ul .right-nav li a{
 
 .home-left h1{
     font-family: "Lato", sans-serif;
-    font-size: 2.5rem;
+    font-size: 3rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
 .home-btn{
     padding: 12px 24px;
     border-radius: 30px;
-    background: none;
-    margin: 25px 0px;
-    background: rgb(199, 48, 65);
+    background: linear-gradient(to right, #E84545, #903749);
     color: white;
     font-weight: 500;
-    border: 2px solid rgb(112, 8, 20);
-}
-
-.home-btn a{
-    color: white;
+    border: none;
+    margin: 25px 0px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     text-decoration: none;
+    display: inline-block;
 }
 
 .home-btn:hover {
-    background-color: #fff;
-    color: black;
-    transition: 0.5s;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
-
-.home-btn:hover a{
-    color: black;
-    transition: 0.5s;
-}
-
 
 .fa-arrow-right{
     font-size: 13px;
@@ -320,22 +316,19 @@ nav ul .right-nav li a{
     align-items: center;
     flex-direction: column;
     gap: 20px;
-    /* width: 27vw;
-    height: 80vh; */
     min-width: 27vw;
     min-height: 73vh;
     background-color: #fff;
-    border-radius: 5px;
+    border-radius: 10px;
     padding-top: 20px;
-    /* position: relative; */
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .signup-input{
     padding: 7px 50px;
     border: 2px solid black;
     border-radius: 5px;
-    /* position: relative; */
 }
 
 .form-group{
@@ -348,12 +341,6 @@ nav ul .right-nav li a{
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    /* font-size: 1rem; */
-    /* text-transform: capitalize;
-    color: aqua;
-    padding: 0 .2rem;
-    pointer-events: none;
-    transition: all .5s ease; */
 }
 
 .form-group i{
@@ -363,38 +350,35 @@ nav ul .right-nav li a{
 .form-group label{
     left: 2.5rem;
     font-size: 15px;
+    pointer-events: none;
+    transition: all .5s ease;
 }
 
-/* .signup-box .form-group input:focus~label,
+.signup-box .form-group input:focus~label,
 .signup-box .form-group input:valid~label,
 .signup-box .form-group input:focus~i,
 .signup-box .form-group input:valid~i {
     top: 0 !important;
     font-size: 12px !important;
     background-color: white;
-    margin: 1rem 0;
-} */
-
-/* .signup-input::placeholder{
-    pad: 0px;
-    font-weight: 500;
-    transform: translateX(-40px);
-} */
+    margin: 0;
+    padding: 0 0.2rem;
+}
 
 .signup-btn{
-    padding: 5px 108px;
+    padding: 10px 108px;
     border-radius: 5px;
     background: linear-gradient(to right, #E84545, #903749);
     color: white;
     font-weight: 600;
-    border: 2px solid rgb(112, 8, 20);
+    border: none;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .signup-btn:hover{
-    background: linear-gradient(to right, #FFAAAA, #FF7777);
-    color: black;
-    transition: 0.5s;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .accountcheck1{

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boarding Pass</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="/boarding-pass.css">
+</head>
+<body>
+    {{>sidebar}}
+    <div class="main-content">
+        {{>header pageTitle="Boarding Pass"}}
+        <main class="boarding-pass-page">
+            <div class="boarding-pass">
+                <div class="pass-header">
+                    <h2>Boarding Pass</h2>
+                    <div class="airline-name">Gemini Airlines</div>
+                </div>
+                <div class="pass-body">
+                    <div class="passenger-info">
+                        <div class="info-item">
+                            <span class="label">Passenger Name</span>
+                            <span class="value">{{customer.firstName}} {{customer.lastName}}</span>
+                        </div>
+                    </div>
+                    <div class="flight-info">
+                        <div class="info-item">
+                            <span class="label">Flight</span>
+                            <span class="value">{{booking.flightNumber}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Date</span>
+                            <span class="value">{{formatDate booking.departureDate}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Seat</span>
+                            <span class="value">{{booking.seatNumber}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Class</span>
+                            <span class="value">{{booking.class}}</span>
+                        </div>
+                    </div>
+                    <div class="route-info">
+                        <div class="route-item">
+                            <span class="label">From</span>
+                            <span class="value-large">{{booking.departure}}</span>
+                        </div>
+                        <div class="route-arrow">
+                            <i class="fas fa-plane"></i>
+                        </div>
+                        <div class="route-item">
+                            <span class="label">To</span>
+                            <span class="value-large">{{booking.arrival}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pass-footer">
+                    <div class="barcode">
+                        <img src="https://www.barcodesinc.com/generator/image.php?code=1234567890&style=197&type=C128B&width=200&height=50&xres=1&font=3" alt="Barcode">
+                    </div>
+                    <div class="footer-text">Have a pleasant flight!</div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

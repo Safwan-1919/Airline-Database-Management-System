@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="/booking.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+    {{>sidebar}}
+    <div class="main-content">
+        {{>header pageTitle="Search Results"}}
+
+        <main class="booking-page">
+            <div class="booking-box">
+                <h2>Search Results for "{{query}}"</h2>
+                {{#if results.length}}
+                    {{#if (eq type 'customer')}}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each results}}
+                                <tr>
+                                    <td>{{this.firstName}} {{this.lastName}}</td>
+                                    <td>{{this.email}}</td>
+                                    <td>{{this.phone}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    {{/if}}
+                    {{#if (eq type 'flight')}}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Flight Number</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Departure</th>
+                                    <th>Arrival</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each results}}
+                                <tr>
+                                    <td>{{this.flightNumber}}</td>
+                                    <td>{{this.from}}</td>
+                                    <td>{{this.to}}</td>
+                                    <td>{{this.departure}}</td>
+                                    <td>{{this.arrival}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    {{/if}}
+                {{else}}
+                    <p>No results found.</p>
+                {{/if}}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

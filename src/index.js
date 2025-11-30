@@ -1,308 +1,456 @@
-const express = require("express")
-const app = express()
-const path = require("path")
-const hbs = require("hbs")
-const { collection, Customer, Booking, History } = require("./mongodb");
-// const Customer = require("./mongodb")
-const templatePath = path.join(__dirname,"../templates")
-const partialsPath = path.join(__dirname, "../templates/partials") 
-const moment = require('moment'); 
+const express = require("express");
+const app = express();
+const path = require("path");
+const hbs = require("hbs");
+const { collection, Customer, Booking, History, ChatSession, ChatMessage } = require("./mongodb");
+const bcrypt = require('bcrypt');
+const moment = require('moment');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
+const http = require('http');
+const socketio = require('socket.io');
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const fs = require('fs');
+const fetch = require('node-fetch');
 
+const server = http.createServer(app);
+const io = socketio(server);
 
+const templatePath = path.join(__dirname, "../templates");
+const partialsPath = path.join(__dirname, "../templates/partials");
 
-app.use(express.json())
-app.set("view engine","hbs")
-app.set("views", templatePath)
-app.use(express.urlencoded({extended:false}))
+// --- Middleware Setup ---
+app.use(express.json());
+app.set("view engine", "hbs");
+app.set("views", templatePath);
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-hbs.registerHelper("formatDate", function (date) {
-    return moment(date).format("YYYY-MM-DD HH:mm:ss");
-  });
+const sessionMiddleware = session({
+    secret: 'mysecret',
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/LoginSignUp' })
+});
+app.use(sessionMiddleware);
+io.use((socket, next) => {
+    sessionMiddleware(socket.request, {}, next);
+});
 
-hbs.registerPartials(partialsPath)
+// --- Handlebars Helpers ---
+hbs.registerHelper("formatDate", (date) => moment(date).format("YYYY-MM-DD HH:mm:ss"));
+hbs.registerHelper('eq', (a, b) => a === b);
+hbs.registerHelper('isCheckinAvailable', (departureDate, status) => {
+    if (status !== 'Booked') return false;
+    const hoursUntilDeparture = moment(departureDate).diff(moment(), 'hours');
+    return hoursUntilDeparture > 0 && hoursUntilDeparture <= 48;
+});
+hbs.registerHelper('JSONstringify', (obj) => JSON.stringify(obj));
+hbs.registerPartials(partialsPath);
 
-const logActivity = async (activity) => {
+// --- Data & Utility Functions ---
+let airportCache = null;
+const getAirports = () => {
+    if (airportCache) return airportCache;
     try {
-        await new History({ activity }).save();
+        const filePath = path.join(__dirname, 'data', 'airports.json');
+        const airportsData = fs.readFileSync(filePath, 'utf8');
+        let airports = JSON.parse(airportsData);
+        const validAirports = airports.filter(a => a && a.iata && a.name && a.type === 'airport' && a.status === 1);
+        validAirports.sort((a, b) => a.name.localeCompare(b.name));
+        airportCache = validAirports;
+        return airportCache;
+    } catch (error) {
+        console.error("Error initializing airport data:", error);
+        return [];
+    }
+};
+
+const AVIATION_API_KEY = "24b89bb0814f08df136fe2ca385f2568";
+const AVIATION_API_URL = `http://api.aviationstack.com/v1/flights?access_key=${AVIATION_API_KEY}`;
+
+const fetchFlights = async (from, to) => {
+    const url = `${AVIATION_API_URL}&dep_iata=${from}&arr_iata=${to}`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (!data || !data.data) return [];
+        return data.data.map(f => ({
+            flightNumber: f.flight.iata,
+            from: f.departure.airport,
+            to: f.arrival.airport,
+            departure: f.departure.scheduled,
+            arrival: f.arrival.scheduled,
+            date: f.flight_date,
+        }));
+    } catch (error) {
+        console.error("Error fetching flights from AviationStack:", error);
+        return [];
+    }
+};
+
+const generateCustomerId = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const logActivity = async (activity, userId = null) => {
+    try {
+        await new History({ activity, userId }).save();
+        io.emit('dataChanged'); // This triggers the dashboard refresh
     } catch (error) {
         console.error("Error logging activity:", error);
     }
 };
 
-
-app.get("/login",(req,res)=>{
-    res.render("login")
-})
-
-app.get("/signup",(req,res)=>{
-    res.render("signup")
-})
-
-app.get("/", (req, res) => {
-    res.render("home");
-});
-
-app.get("/dashboard", (req, res) => {
-    res.render("dashboard", { title: "Dashboard" });
-});
-
-app.get("/customer-details", (req, res) => {
-    res.render("customer-details");
-});
-
-app.post("/signup", async (req, res) => {
-    const data = {
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
-    };
-
+const getDashboardData = async (userId) => {
     try {
-        // Check if the email already exists
-        const existingUser = await collection.findOne({ email: data.email });
-        if (existingUser) {
-            return res.render("home", { message: "Email already registered" });
+        if (!userId) {
+            return {
+                flightsBooked: await Booking.countDocuments(),
+                upcomingFlights: await Booking.countDocuments({ departureDate: { $gte: new Date() } }),
+                totalSpent: await Booking.countDocuments() * 200,
+                cancellations: await History.countDocuments({ activity: /canceled/ }),
+                activeUsers: await collection.countDocuments(),
+                revenue: await Booking.countDocuments() * 200,
+                recentBookings: await Booking.find().sort({ departureDate: -1 }).limit(5)
+            };
         }
+        const user = await collection.findById(userId);
+        if (!user) return null;
+        const userEmail = user.email;
 
-        // If the email does not exist, insert the new user
-        await collection.insertMany(data);
-        logActivity(`User signed up: ${req.body.username}`);
-        res.render("home", { message: "Registered Successfully" });
+        // Find the customer associated with this email
+        const customer = await Customer.findOne({ email: userEmail });
+        
+        if (!customer) {
+            return { flightsBooked: 0, upcomingFlights: 0, totalSpent: 0, cancellations: 0, activeUsers: await collection.countDocuments(), revenue: 0, recentBookings: [] };
+        }
+        const flightsBooked = await Booking.countDocuments({ customerId: customer.customerId });
+        const upcomingFlights = await Booking.countDocuments({ customerId: customer.customerId, departureDate: { $gte: new Date() } });
+        const totalSpent = flightsBooked * 200;
+        const cancellations = await History.countDocuments({ userId: userId });
+        const recentBookings = await Booking.find({ customerId: customer.customerId }).sort({ departureDate: -1 }).limit(5);
+        const flightsByClass = await Booking.aggregate([
+            { $match: { customerId: customer.customerId } },
+            { $group: { _id: "$class", count: { $sum: 1 } } },
+            { $sort: { "_id": 1 } }
+        ]);
+        const classLabels = flightsByClass.map(item => item._id);
+        const classData = flightsByClass.map(item => item.count);
+        return { flightsBooked, upcomingFlights, totalSpent, cancellations, activeUsers: await collection.countDocuments(), revenue: totalSpent, recentBookings, classLabels, classData };
     } catch (error) {
-        console.error(error);
-        res.render("home", { message: "An error occurred during registration" });
+        console.error("Error in getDashboardData:", error);
+        throw error;
     }
-});
-
-app.post("/login",async (req,res)=>{
-    try{
-        const check = await collection.findOne({username:req.body.username})
-        if(check.password === req.body.password){
-            logActivity(`User logged in: ${req.body.username}`);
-            res.render("dashboard", {message: "You are Logged In"});
-        }
-        else{
-            res.render("login", {messagenot:"Incorrect Password"});
-        }
-    }
-    catch{
-        res.render("login", {messagenot:"Incorrect Details"});
-    }
-})
-
-const generateCustomerId = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-app.post("/customer-details", async (req, res) => {
-    try {
-        const customerId = generateCustomerId();
-        const customer = new Customer({
-            customerId,
-            ...req.body
-        });
-        await customer.save();
-        await logActivity(`Customer details saved for customer ID ${customerId}`);
+// --- Socket.io Logic ---
+io.on('connection', (socket) => {
+    const userId = socket.request.session.userId;
+    if (!userId) return;
 
-        res.render("customer-details", { 
-            message: "Details saved successfully!",
-            customerId 
-        });
-    } catch (err) {
-        console.error("Error saving customer details:", err.message); // Log error message
-        res.status(400).send("Error saving customer details");
-    }
-});
+    getDashboardData(userId).then(data => {
+        if(data) socket.emit('dashboardData', data);
+    });
 
-const countries = ["USA", "Canada", "India", "UK", "Australia", "Germany", "France"];
+    collection.findById(userId).then(user => {
+        if (user && user.role === 'agent') socket.join('agents');
+    });
 
-app.get("/booking", (req, res) => {
-  res.render("booking", { pageTitle: "Booking" });
-});
-
-
-
-
-
-// const generateBookingId = () => {
-//     return Math.floor(100000 + Math.random() * 900000).toString();
-// };
-
-app.post("/fetch-customer", async (req, res) => {
-    const { identifier } = req.body;
-    let customer;
-    if (identifier.length === 6) {
-        customer = await Customer.findOne({ customerId: identifier });
-    } else if (identifier.length === 14) {
-        customer = await Customer.findOne({ aadharNumber: identifier });
-    }
-    
-    if (!customer) {
-        return res.status(404).send("Customer not found");
-    }
-
-    res.render("booking", { 
-        customerId: customer.customerId,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        email: customer.email,
-        phone: customer.phone,
-        countries
+    socket.on('customer:startChat', async () => {
+        try {
+            let sess = await ChatSession.findOneAndUpdate({ customerId: userId, status: { $in: ['waiting', 'active'] } }, { status: 'waiting' }, { new: true, upsert: true }).populate('customerId');
+            socket.join(sess._id.toString());
+            socket.emit('chat:sessionCreated', sess._id);
+            io.to('agents').emit('agent:newSession', sess);
+        } catch (error) { console.error('Error starting chat:', error); }
+    });
+    socket.on('agent:joinSession', async (sessionId) => {
+        const agentId = socket.request.session.userId;
+        socket.join(sessionId);
+        await ChatSession.findByIdAndUpdate(sessionId, { status: 'active', agentId });
+        io.to(sessionId).emit('agent:joined', { agentId });
+    });
+    socket.on('chat:message', async ({ sessionId, message }) => {
+        try {
+            const msg = new ChatMessage({ chatSessionId: sessionId, sender: userId, message });
+            await msg.save();
+            io.to(sessionId).emit('chat:message', { sender: userId, message: msg.message });
+        } catch (error) { console.error('Error saving message:', error); }
     });
 });
 
-
-const flights = [
-    { flightNumber: 'UA123', from: 'USA', to: 'Canada', departure: '10:00 AM', arrival: '02:00 PM', date: '2024-08-15', seatsAvailable: 100 },
-    { flightNumber: 'LH456', from: 'India', to: 'USA', departure: '12:00 PM', arrival: '04:00 PM', date: '2024-08-16', seatsAvailable: 50 },
-    { flightNumber: 'AA789', from: 'Canada', to: 'USA', departure: '09:00 AM', arrival: '01:00 PM', date: '2024-08-17', seatsAvailable: 75 }
-];
-
-app.get("/available-flights", (req, res) => {
-    const { from, to } = req.query;
-    const availableFlights = flights.filter(flight => flight.from === from && flight.to === to && flight.seatsAvailable > 0);
-    if (availableFlights.length === 0) {
-        return res.status(404).send({ message: "No flights available or seats are taken." });
-    }
-    res.json(availableFlights);
-});
-
-const flightSeats = {
-    'UA123': 100,
-    'LH456': 50,
-    'AA789': 75
+// --- Middleware ---
+const requireLogin = (req, res, next) => req.session.userId ? next() : res.redirect('/login');
+const requireAgent = async (req, res, next) => {
+    try {
+        const user = await collection.findById(req.session.userId);
+        (user && user.role === 'agent') ? next() : res.status(403).send("Access Denied");
+    } catch { res.status(500).send("An error occurred."); }
 };
 
-
-app.post("/booking", async (req, res) => {
-    const { customerId, flightNumber, departure, arrival, departureDate, seatNumber, class: travelClass } = req.body;
-    
-    try {
-        // Check if the seat number is already taken
-        const existingBooking = await Booking.findOne({ flightNumber, seatNumber });
-        if (existingBooking) {
-            return res.status(400).json({ message: `Seat number ${seatNumber} is not available.` });
+// --- Page & Action Routes ---
+app.get("/", (req, res) => res.render("home"));
+app.get("/login", (req, res) => res.render("login"));
+app.get("/signup", (req, res) => res.render("signup"));
+app.get('/logout', (req, res) => {
+    const userId = req.session.userId;
+    req.session.destroy(err => {
+        if (err) {
+            return res.redirect('/dashboard');
         }
-        
-        // Check seat availability for the flight
-        if (flightSeats[flightNumber] <= 0) {
-            return res.status(400).json({ message: `No seats available for flight ${flightNumber}.` });
+        if (userId) {
+            logActivity('User logged out', userId);
         }
-
-        // Calculate arrivalDate based on departureDate
-        // Assuming a fixed duration for simplicity, e.g., 4 hours
-        const flightDurationInHours = 4;
-        const departureMoment = moment(departureDate);
-        const arrivalMoment = departureMoment.add(flightDurationInHours, 'hours');
-        const calculatedArrivalDate = arrivalMoment.format('YYYY-MM-DD');
-
-        // Save booking
-        const booking = new Booking({
-            customerId,
-            flightNumber,
-            departure,
-            arrival,
-            departureDate,
-            arrivalDate: calculatedArrivalDate, // Use calculated arrival date
-            seatNumber,
-            class: travelClass
-        });
-        await booking.save();
-        
-        // Decrement seat count
-        flightSeats[flightNumber]--;
-        await logActivity(`Booking made for customer ${customerId} on flight ${flightNumber}`);
-
-
-        res.status(200).json({ message: `Booking successful! Booking ID: ${booking._id}` });
-    } catch (error) {
-        console.error("Error processing booking:", error.message); // Log the error
-        res.status(500).json({ message: 'An error occurred while booking your flight.' });
-    }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+    });
 });
-
-app.get("/cancellation", (req, res) => {
-    res.render("cancellation");
+app.get("/dashboard", requireLogin, async (req, res) => {
+    const data = await getDashboardData(req.session.userId);
+    res.render("dashboard", { ...data, activePage: 'dashboard', username: req.session.username });
 });
-
-
-app.post("/cancel-booking", async (req, res) => {
-    const { bookingNumber } = req.body;
-    console.log('Received booking number:', bookingNumber);
-    
-    try {
-        if (!bookingNumber) {
-            return res.status(400).json({ message: 'Please provide a booking number.' });
-        }
-        
-        // Validate the booking number format
-        if (!mongoose.Types.ObjectId.isValid(bookingNumber)) {
-            return res.status(400).json({ message: 'Invalid booking number format.' });
-        }
-
-        // Check if the booking number is valid
-        const booking = await Booking.findOne({ _id: new mongoose.Types.ObjectId(bookingNumber) });
-        if (!booking) {
-            return res.status(404).json({ message: 'Booking not found.' });
-        }
-
-        // Remove the booking from the database
-        const result = await Booking.deleteOne({ _id: new mongoose.Types.ObjectId(bookingNumber) });
-
-        if (result.deletedCount === 1) {
-            await logActivity(`Booking with ID ${bookingNumber} canceled`);
-            res.json({ message: 'Booking canceled successfully.' });
-        } else {
-            res.status(404).json({ message: 'Booking not found.' });
-        }
-    } catch (error) {
-        console.error('Error canceling booking:', error);
-        res.status(500).json({ message: 'An error occurred while canceling the booking.' });
-    }
+app.get("/history", requireLogin, async (req, res) => {
+    const activities = await History.find({ userId: req.session.userId }).sort({ timestamp: -1 });
+    res.render("history", { activities, activePage: 'history', username: req.session.username });
 });
-
-// Fetch bookings by customer ID
-app.get("/customer-bookings", async (req, res) => {
+app.get("/cancellation", requireLogin, (req, res) => res.render("cancellation", { activePage: 'cancellation' }));
+app.get("/customer-details", requireLogin, (req, res) => res.render("customer-details", { activePage: 'user' }));
+app.get("/profile", requireLogin, async (req, res) => {
+    const user = await collection.findById(req.session.userId);
+    const customer = await Customer.findOne({ email: user.email });
+    const bookings = customer ? await Booking.find({ customerId: customer.customerId }).sort({ departureDate: -1 }) : [];
+    res.render("profile", { customer, bookings, activePage: 'profile', username: req.session.username });
+});
+app.get("/agent-dashboard", requireLogin, requireAgent, async (req, res) => {
+    const sessions = await ChatSession.find({ status: { $in: ['waiting', 'active'] } }).populate('customerId', 'username').sort({ createdAt: 1 });
+    res.render("agent-dashboard", { sessions, activePage: 'agent-dashboard', username: req.session.username, userId: req.session.userId });
+});
+app.get("/booking", requireLogin, async (req, res) => {
+    const airports = getAirports();
     const { customerId } = req.query;
+    if (customerId) {
+        const customer = await Customer.findOne({ customerId });
+        if (customer) return res.render("booking", { pageTitle: "Booking for Customer", activePage: 'booking', airports, customerId: customer.customerId, firstName: customer.firstName, lastName: customer.lastName, email: customer.email, phone: customer.phone });
+    }
+    res.render("booking", { pageTitle: "Booking", activePage: 'booking', airports });
+});
+app.get("/boarding-pass/:bookingId", requireLogin, async (req, res) => {
+    const { bookingId } = req.params;
+    const booking = await Booking.findById(bookingId);
+    if (!booking || booking.status !== 'Checked-In') return res.status(404).send("Boarding pass not available.");
+    const customer = await Customer.findOne({ customerId: booking.customerId });
+    res.render("boarding-pass", { booking, customer, username: req.session.username });
+});
+app.get("/contact", (req, res) => res.render("contact"));
+app.post("/login", async (req, res) => {
     try {
-        const bookings = await Booking.find({ customerId });
-        if (bookings.length > 0) {
-            res.json(bookings);
+        const check = await collection.findOne({ username: req.body.username.trim() });
+        if (check && await bcrypt.compare(req.body.password.trim(), check.password)) {
+            req.session.userId = check._id;
+            req.session.username = check.username;
+            await logActivity('User logged in', check._id);
+            res.redirect("/dashboard");
         } else {
-            res.status(404).json({ message: 'No bookings found for this customer.' });
+            res.render("login", { messagenot: "Incorrect username or password" });
+        }
+    } catch { res.render("login", { messagenot: "An error occurred" }); }
+});
+app.post("/signup", async (req, res) => {
+    try {
+        if (await collection.findOne({ email: req.body.email })) return res.render("home", { message: "Email already registered" });
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        await collection.create({ username: req.body.username, email: req.body.email, password: hashedPassword });
+        res.render("home", { message: "Registered Successfully" });
+    } catch { res.render("home", { message: "An error occurred" }); }
+});
+app.post("/fetch-customer", requireLogin, async (req, res) => {
+    const { identifier } = req.body;
+    let customer = (identifier.length === 6) ? await Customer.findOne({ customerId: identifier }) : await Customer.findOne({ aadharNumber: identifier });
+    if (!customer) return res.status(404).send("Customer not found");
+    res.render("booking", { pageTitle: "Booking", activePage: 'booking', airports: getAirports(), customerId: customer.customerId, firstName: customer.firstName, lastName: customer.lastName, email: customer.email, phone: customer.phone });
+});
+app.post("/booking", requireLogin, async (req, res) => {
+    try {
+        if (await Booking.findOne({ flightNumber: req.body.flightNumber, seatNumber: req.body.seatNumber })) return res.status(400).json({ message: `Seat number ${req.body.seatNumber} is not available.` });
+        const booking = new Booking(req.body);
+        await booking.save();
+        await logActivity(`New booking created: ${booking._id}`, req.session.userId);
+        res.status(200).json({ message: `Booking successful! Booking ID: ${booking._id}` });
+    } catch(e) { res.status(500).json({ message: 'An error occurred while booking.' }); }
+});
+app.post("/cancel-booking", requireLogin, async (req, res) => {
+    try {
+        await Booking.deleteOne({ _id: req.body.bookingNumber });
+        await logActivity(`Booking canceled: ${req.body.bookingNumber}`, req.session.userId);
+        res.json({ message: 'Booking canceled successfully.' });
+    } catch { res.status(500).json({ message: 'Error canceling booking.'}); }
+});
+app.post("/check-in/:bookingId", requireLogin, async (req, res) => {
+    await Booking.findByIdAndUpdate(req.params.bookingId, { status: 'Checked-In' });
+    await logActivity(`Checked in for booking: ${req.params.bookingId}`, req.session.userId);
+    res.redirect(`/boarding-pass/${req.params.bookingId}`);
+});
+app.post("/customer-details", requireLogin, async (req, res) => {
+    const customer = new Customer({ customerId: generateCustomerId(), ...req.body });
+    await customer.save();
+    await logActivity(`New customer created: ${customer.firstName} ${customer.lastName}`, req.session.userId);
+    res.render("customer-details", { message: "Details saved successfully!", customerId: customer.customerId });
+});
+app.post("/profile", requireLogin, async (req, res) => {
+    await Customer.updateOne({ email: req.body.email }, { $set: req.body });
+    res.redirect("/profile");
+});
+app.post("/contact", (req, res) => res.render("contact", { message: "Your message has been sent successfully!" }));
+
+// --- API Routes ---
+app.get("/dashboard-data", requireLogin, async (req, res) => {
+    const data = await getDashboardData(req.session.userId);
+    res.json(data);
+});
+app.get("/available-flights", requireLogin, async (req, res) => {
+    const { from, to } = req.query;
+    const availableFlights = await fetchFlights(from, to);
+    if (!availableFlights.length) return res.status(404).json({ message: "No flights available." });
+    res.json(availableFlights);
+});
+app.get('/api/flights/:flightNumber/seats', requireLogin, async (req, res) => {
+    const bookings = await Booking.find({ flightNumber: req.params.flightNumber });
+    res.json(bookings.map(b => b.seatNumber));
+});
+app.get("/api/customer-from-session/:sessionId", requireLogin, requireAgent, async (req, res) => {
+    const chatSession = await ChatSession.findById(req.params.sessionId).populate('customerId');
+    res.json(chatSession.customerId);
+});
+app.get("/api/chat-history/:sessionId", requireLogin, requireAgent, async (req, res) => {
+    const messages = await ChatMessage.find({ chatSessionId: req.params.sessionId }).sort({ timestamp: 'asc' });
+    res.json(messages);
+});
+app.get("/api/bookings-for-customer/:customerId", requireLogin, requireAgent, async (req, res) => {
+    const customer = await Customer.findOne({ customerId: req.params.customerId });
+    const bookings = await Booking.find({ customerId: customer.customerId }).sort({ departureDate: -1 });
+    res.json(bookings);
+});
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// AI Setup
+const genAI = new GoogleGenerativeAI("AIzaSyDBP2H5tSq7qb-SxMTogqUpz9ibxpWbEaA");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+
+const tools = [
+    {
+      functionDeclarations: [
+        {
+          name: "book_flight",
+          description: "Books a flight for a user.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              customerId: { type: "STRING", description: "The unique ID of the customer." },
+              flightNumber: { type: "STRING", description: "The flight number, e.g., 'BA2490'." },
+              date: { type: "STRING", description: "The date of the flight in YYYY-MM-DD format." },
+              seatNumber: { type: "STRING", description: "The seat number, e.g., '14A'." },
+              class: { type: "STRING", description: "The travel class, e.g., 'Economy'." },
+            },
+            required: ["customerId", "flightNumber", "date", "seatNumber", "class"],
+          },
+        },
+        {
+          name: "cancel_flight",
+          description: "Cancels a flight booking for a user.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              bookingId: { type: "STRING", description: "The unique ID of the booking to cancel." },
+            },
+            required: ["bookingId"],
+          },
+        },
+      ],
+    },
+];
+
+async function book_flight(args) {
+    try {
+        const { customerId, flightNumber, date, seatNumber, class: travelClass } = args;
+        // Simplified booking logic, assuming departure/arrival can be inferred or are not needed for this step
+        const booking = new Booking({ customerId, flightNumber, departure: "N/A", arrival: "N/A", departureDate: date, arrivalDate: date, seatNumber, class: travelClass });
+        await booking.save();
+        return { success: true, bookingId: booking._id.toString() };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+}
+
+async function cancel_flight(args) {
+    try {
+        const { bookingId } = args;
+        const result = await Booking.deleteOne({ _id: bookingId });
+        if (result.deletedCount > 0) {
+            return { success: true, message: "Booking canceled successfully." };
+        }
+        return { success: false, error: "Booking not found." };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+}
+
+app.post("/api/chatbot", requireLogin, async (req, res) => {
+    const { message } = req.body;
+    
+    try {
+        const chat = model.startChat({ tools: tools });
+        const result = await chat.sendMessage(message);
+        const call = result.response.functionCalls()?.[0];
+
+        if (call) {
+            const apiResponse = await global[call.name](call.args);
+            const result2 = await chat.sendMessage([
+                {
+                    functionResponse: {
+                        name: call.name,
+                        response: apiResponse,
+                    },
+                },
+            ]);
+            const finalResponse = result2.response.text();
+            res.json({ reply: finalResponse });
+        } else {
+            res.json({ reply: result.response.text() });
         }
     } catch (error) {
-        console.error('Error fetching customer bookings:', error);
-        res.status(500).json({ message: 'An error occurred while fetching customer bookings.' });
+        console.error("AI Chatbot Error:", error);
+        res.status(500).json({ reply: "Sorry, I encountered an error." });
     }
 });
 
-app.get("/history", async (req, res) => {
+app.get("/weather", async (req, res) => {
+    const { lat, lon } = req.query;
+    if (!lat || !lon) return res.status(400).json({ error: "Latitude and longitude are required" });
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
     try {
-      const activities = await History.find().sort({ timestamp: -1 });
-      res.render("history", { activities });
-    } catch (error) {
-      console.error("Error fetching history:", error);
-      res.status(500).send("An error occurred while fetching history.");
-    }
-  });
-
-app.get('/logout', async (req, res) => {
-  try {
-    await logActivity('User logged out');
-    // Perform any other logout actions like clearing session, etc.
-    res.redirect('/');
-  } catch (error) {
-    console.error('Error during logout:', error);
-    res.status(500).send('Internal Server Error');
-  }
+        const response = await fetch(url);
+        const weatherData = await response.json();
+        res.json(weatherData);
+    } catch (error) { res.status(500).json({ error: "Failed to fetch weather data" }); }
 });
 
+app.get("/debug-customer-emails", requireLogin, async (req, res) => {
+    try {
+        const loggedInUser = await collection.findById(req.session.userId);
+        const allCustomers = await Customer.find({}, 'firstName lastName email customerId');
+        
+        res.json({
+            loggedInUserEmail: loggedInUser ? loggedInUser.email : 'Not logged in',
+            allCustomerProfiles: allCustomers
+        });
+    } catch (error) {
+        console.error("Error in /debug-customer-emails:", error);
+        res.status(500).json({ error: "Failed to fetch debug info" });
+    }
+});
 
-
-app.listen(3000, ()=>{
-    console.log("Port Connected!")
-})
+// --- Server Listen ---
+server.listen(3000, () => {
+    console.log("Port Connected!");
+});

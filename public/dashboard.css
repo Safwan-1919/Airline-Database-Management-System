@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 *{
     margin: 0;
@@ -9,6 +9,7 @@
 
 body{
     display: flex;
+    background: #f1f4f8;
 }
 
 .sidebar{
@@ -26,22 +27,23 @@ body{
 
 .sidebar:hover{
     width: 250px;
-    transition: 0.5s;
 }
 
 .logo{
     padding: 18px 0px;
     height: 80px;
+    display: flex;
+    align-items: center;
 }
 
 .logo img{
     width: 70px;
+    transition: width 0.5s;
 }
 
 .sidebar:hover .logo img{
     width: 150px;
     padding: 0px 16px;
-    transition: all 0.5s ;
 }
 
 .menu{
@@ -58,14 +60,10 @@ body{
     border-radius: 8px;
 }
 
-.menu li:hover,
-.active{
+.menu li:hover, .active{
     background-color: #FF7777;
 }
 
-.menu li:hover a{
-    color: black;
-}
 .menu li a{
     color: white;
     text-decoration: none;
@@ -80,7 +78,7 @@ body{
 }
 
 .menu li a i{
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .logout{
@@ -92,12 +90,12 @@ body{
 
 .main-content{
     position: relative;
-    background: #fff;
+    flex-grow: 1; /* Corrected from width: 100% */
     width: 100%;
-    padding: 0.5rem;
+    padding: 1rem;
 }
 
-.header-main{
+#main-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -106,80 +104,91 @@ body{
     flex-wrap: wrap;
     padding: 10px 2rem;
     margin: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.header-main .header-title{
-    color: black;
-}
-
-.header-main .search-info{
+#main-header .search-info{
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 1rem;
 }
 
-.header-main .search-info .search-box{
+#main-header .search-info .search-box{
     display: flex;
     align-items: center;
-    background-color: #fff;
-    color: #000;
+    background-color: #f1f4f8;
     border-radius: 15px;
-    gap: 5px;
-    padding: 4px 12px;
+    gap: 10px;
+    padding: 8px 12px;
 }
 
-.header-main .search-info .search-box input{
+#main-header .search-info .search-box input{
     background: transparent;
-    padding: 3px;
     border: none;
-}
-.header-main .search-info .search-box i{
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.5s ease-out;
-}
-.header-main .search-info .search-box i:hover{
-    transform: scale(1.1);
+    outline: none;
 }
 
-.header-main .search-info img{
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+#main-header .search-info .search-box i{
     cursor: pointer;
-}
-
-.messageType{
-    width: 30%;
-    text-align: center;
-    border: 2px solid black;
-    margin: auto;
-    color: green;
-    font-weight: 600;
-    border-radius: 5px;
 }
 
 /* Dashboard Section */
 .dashboard-section {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 20px;
 }
 
-/* Cards */
 .cards-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
-  flex: 1;
+}
+
+/* Unified Card Style */
+.card,
+.dashboard-chart,
+.dashboard-status,
+.dashboard-weather,
+.recent-bookings {
+  background: rgba(255, 218, 218, 0.4);
+  backdrop-filter: blur(12px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dashboard-status,
+.dashboard-weather {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Added to center h3 and other text blocks */
+}
+
+.status-box,
+.weather-box {
+  font-size: 1.5rem; /* Increased font size */
+  gap: 1rem;
+  display: flex; /* Ensure these are flex containers */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+
+.status-box i {
+  font-size: 3rem; /* Increased icon size */
+  color: #28a745; /* Green color for status icon */
+}
+
+.weather-box i {
+  font-size: 3rem; /* Increased icon size */
+  color: #e2395b; /* Red color for weather icon */
 }
 
 .card {
-  background: #fff;
-  border-radius: 15px;
-  padding: 20px;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -206,47 +215,144 @@ body{
   color: #111;
 }
 
-/* Weather */
-.dashboard-weather {
-  flex: 0.4;
-  background: #fff;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+.dashboard-middle {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 20px;
 }
 
-.dashboard-weather h3 {
-  margin-bottom: 15px;
+.dashboard-chart, .dashboard-status, .dashboard-weather {
+  flex: 1;
 }
 
-.weather-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 18px;
+.recent-bookings table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.weather-box i {
-  font-size: 28px;
-  color: #e2395b;
+.recent-bookings th, .recent-bookings td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(232, 69, 69, 0.2);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 80px;
-  }
-  .sidebar:hover {
-    width: 200px;
-  }
-  .dashboard-section {
+.recent-bookings tr:last-child td {
+    border-bottom: none;
+}
+
+.recent-bookings tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status.confirmed { background-color: rgba(92, 184, 92, 0.2); color: #155724; }
+.status.cancelled { background-color: rgba(232, 69, 69, 0.2); color: #721c24; }
+
+/* Chat Launcher & Widget */
+#chat-launcher {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: #E84545;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 999;
+}
+#chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    overflow: hidden;
+    display: none; /* Hidden by default */
     flex-direction: column;
-  }
-  .dashboard-weather {
-    flex: 1;
-  }
+}
+#chat-widget .chat-header {
+    background: #E84545;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#chat-widget .chat-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+#close-chat-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem; /* Adjusted font size */
+    cursor: pointer;
+    display: flex; /* Added for centering */
+    justify-content: center; /* Added for centering */
+    align-items: center; /* Added for centering */
+    padding: 0.5rem; /* Added padding */
+}
+#chat-widget .chat-body {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    height: 300px;
+}
+#chat-widget .chat-footer {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+#chat-widget .chat-message {
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word;
+    margin-bottom: 10px;
+}
+#chat-widget .chat-message.customer {
+    background-color: #f1f0f0;
+    align-self: flex-start;
+}
+#chat-widget .chat-message.agent {
+    background-color: #E84545;
+    color: white;
+    align-self: flex-end;
+}
+#chat-widget #chat-input {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+#chat-widget #chat-send-btn {
+    background: #E84545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
 }

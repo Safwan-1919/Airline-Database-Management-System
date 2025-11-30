@@ -3,19 +3,19 @@
         <img src="/images/logo1.png" alt="logo">
     </div>
     <ul class="menu">
-        <li class="active">
+        <li class="{{#if (eq activePage 'dashboard')}}active{{/if}}">
             <a href="/dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
         </li>
-        <li>
+        <li class="{{#if (eq activePage 'user')}}active{{/if}}">
             <a href="/customer-details"><i class="fa-solid fa-user"></i><span>User</span></a>
         </li>
-        <li>
+        <li class="{{#if (eq activePage 'booking')}}active{{/if}}">
             <a href="/booking"><i class="fa-solid fa-plane"></i><span>Book</span></a>
         </li>
-        <li>
+        <li class="{{#if (eq activePage 'cancellation')}}active{{/if}}">
             <a href="/cancellation"><i class="fa-solid fa-ban"></i><span>Cancel</span></a>
         </li>
-        <li>
+        <li class="{{#if (eq activePage 'history')}}active{{/if}}">
             <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
         </li>
         <li class="logout">
@@ -23,3 +23,24 @@
         </li>
     </ul>
 </div>
+
+<!-- Chat Launcher and Widget -->
+<div class="chat-launcher" id="chat-launcher">
+    <i class="fa-solid fa-comments"></i>
+</div>
+<div class="chat-widget" id="chat-widget" style="display: none;">
+    <div class="chat-header">
+        <h3>Live Chat</h3>
+        <button id="close-chat-btn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="chat-body" id="chat-body">
+        <!-- Messages will be appended here -->
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="chat-input" placeholder="Type a message...">
+        <button id="chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/chat.js"></script>

@@ -1,10 +1,10 @@
 const mongoose = require("mongoose")
 mongoose.connect("mongodb://localhost:27017/LoginSignUp")
 .then(()=>{
-    console.log("mongodb connected");
+    console.log("mongodb connected successfully");
 })
-.catch(()=>{
-    console.log("failed to connect");
+.catch((err)=>{
+    console.log("failed to connect to mongodb", err);
 })
 
 const loginSchema = mongoose.Schema({
@@ -20,6 +20,11 @@ const loginSchema = mongoose.Schema({
     password:{
         type:String,
         required:true
+    },
+    role: {
+        type: String,
+        enum: ['customer', 'agent'],
+        default: 'customer'
     }
 })
 
@@ -57,7 +62,12 @@ const bookingSchema = new mongoose.Schema({
     departureDate: { type: Date, required: true },
     arrivalDate: { type: Date, required: true },
     seatNumber: { type: String, required: true },
-    class: { type: String, required: true }
+    class: { type: String, required: true },
+    status: {
+        type: String,
+        enum: ['Booked', 'Checked-In', 'Completed'],
+        default: 'Booked'
+    }
 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
@@ -65,10 +75,36 @@ const Booking = mongoose.model('Booking', bookingSchema);
 // module.exports = {collection, Customer};
 
 const historySchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection1', required: false }, // Link to the user who performed the activity
     activity: { type: String, required: true },
     timestamp: { type: Date, default: Date.now }
 });
 
 const History = mongoose.model('History', historySchema);
 
-module.exports = { collection, Customer, Booking, History};
+const chatMessageSchema = new mongoose.Schema({
+    chatSessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'ChatSession', required: true },
+    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection1', required: true },
+    message: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+
+const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
+
+const chatSessionSchema = new mongoose.Schema({
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection1', required: true },
+    agentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection1' },
+    status: {
+        type: String,
+        enum: ['waiting', 'active', 'closed'],
+        default: 'waiting'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const ChatSession = mongoose.model('ChatSession', chatSessionSchema);
+
+module.exports = { collection, Customer, Booking, History, ChatSession, ChatMessage };

@@ -10,64 +10,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo">
-            <img src="/images/logo1.png" alt="logo">
-        </div>
-        {{!-- <div class="sidebar-nav"> --}}
-            <ul class="menu">
-                <li>
-                    <a href="/dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
-                </li>
-                <li>
-                    <a href="/customer-details"><i class="fa-solid fa-user"></i><span>User</span></a>
-                </li>
-                <li>
-                    <a href="/booking"><i class="fa-solid fa-plane"></i><span>Book</span></a>
-                </li>
-                <li class="active">
-                    <a href="/cancellation"><i class="fa-solid fa-ban"></i><span>Cancel</span></a>
-                </li>
-                <li>
-                    <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
-                </li>
-                <li class="logout">
-                    <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
-                </li>
-            </ul>
-        {{!-- </div> --}}
-    </div>
+    {{> sidebar }}
     <div class="main-content">
-        <div class="header-main">
-        <div class="header-title">
-            <h2>Dashboard</h2>
-        </div>
-        <div class="search-info">
-            <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search">
+        {{>header pageTitle="Cancellation"}}
+        <div class="cancellation-page">
+            <div class="cancellation-box">
+                <h1>Cancel Booking</h1>
+
+                <!-- Cancel by Booking Number -->
+                <h2>Cancel by Booking Number</h2>
+                <form id="cancel-by-number-form">
+                    <input type="text" name="bookingNumber" placeholder="Enter Booking Number" required>
+                    <button type="submit">Cancel Booking</button>
+                </form>
+
+                <!-- Find and Cancel Bookings by Customer ID -->
+                <h2>Find and Cancel Bookings by Customer ID</h2>
+                <form id="find-bookings-form">
+                    <input type="text" name="customerId" placeholder="Enter Customer ID" required>
+                    <button type="submit">Find Bookings</button>
+                </form>
+
+                <div id="bookings-list"></div>
             </div>
-            <img src="/images/user.jpg" alt="user">
         </div>
-        </div>
-    <h1>Cancel Booking</h1>
-
-    <!-- Cancel by Booking Number -->
-    <h2>Cancel by Booking Number</h2>
-    <form id="cancel-by-number-form">
-        <input type="text" name="bookingNumber" placeholder="Enter Booking Number" required>
-        <button type="submit">Cancel Booking</button>
-    </form>
-
-    <!-- Find and Cancel Bookings by Customer ID -->
-    <h2>Find and Cancel Bookings by Customer ID</h2>
-    <form id="find-bookings-form">
-        <input type="text" name="customerId" placeholder="Enter Customer ID" required>
-        <button type="submit">Find Bookings</button>
-    </form>
-
-    <div id="bookings-list"></div>
-
     </div>
     <script>
         // Handle cancel by booking number

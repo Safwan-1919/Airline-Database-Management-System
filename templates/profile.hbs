@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/profile.css">
+    <link rel="stylesheet" href="/dashboard.css">
+    <script src="https://kit.fontawesome.com/5082d39339.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+    {{>sidebar}}
+    <div class="main-content">
+        {{>header pageTitle="User Profile"}}
+
+        <main class="profile-page">
+            <div class="profile-box">
+                <h2>Your Profile</h2>
+                {{#if customer}}
+                <form action="/profile" method="POST">
+                    <fieldset>
+                        <legend>Personal Information</legend>
+                        <input type="hidden" name="email" value="{{customer.email}}">
+                        <div class="form-group">
+                            <input type="text" id="firstName" name="firstName" value="{{customer.firstName}}">
+                            <label for="firstName">First Name</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="lastName" name="lastName" value="{{customer.lastName}}">
+                            <label for="lastName">Last Name</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="date" id="dob" name="dob" value="{{formatDate customer.dob 'YYYY-MM-DD'}}">
+                            <label for="dob">Date of Birth</label>
+                        </div>
+                         <div class="form-group">
+                            <input type="text" id="gender" name="gender" value="{{customer.gender}}">
+                            <label for="gender">Gender</label>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Contact Information</legend>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" value="{{customer.email}}" disabled>
+                            <label for="email">Email</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" name="phone" value="{{customer.phone}}">
+                            <label for="phone">Phone</label>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Address</legend>
+                        <div class="form-group">
+                            <input type="text" id="address" name="address" value="{{customer.address}}">
+                            <label for="address">Address</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="city" name="city" value="{{customer.city}}">
+                            <label for="city">City</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="state" name="state" value="{{customer.state}}">
+                            <label for="state">State</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="pin" name="pin" value="{{customer.pin}}">
+                            <label for="pin">PIN Code</label>
+                        </div>
+                         <div class="form-group">
+                            <input type="text" id="country" name="country" value="{{customer.country}}">
+                            <label for="country">Country</label>
+                        </div>
+                    </fieldset>
+                    <button type="submit">Update Profile</button>
+                </form>
+
+                <div class="bookings-history">
+                    <h3>My Bookings</h3>
+                    {{#if bookings}}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Flight Number</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Departure Date</th>
+                                    <th>Seat</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each bookings}}
+                                <tr>
+                                    <td>{{this.flightNumber}}</td>
+                                    <td>{{this.departure}}</td>
+                                    <td>{{this.to}}</td>
+                                    <td>{{formatDate this.departureDate}}</td>
+                                    <td>{{this.seatNumber}}</td>
+                                    <td>{{this.status}}</td>
+                                    <td>
+                                        {{#if (isCheckinAvailable this.departureDate this.status)}}
+                                            <form action="/check-in/{{this._id}}" method="POST" style="margin:0;">
+                                                <button type="submit" class="btn-check-in">Check-in</button>
+                                            </form>
+                                        {{else if (eq this.status "Checked-In")}}
+                                            <a href="/boarding-pass/{{this._id}}" class="btn-view-pass">View Pass</a>
+                                        {{/if}}
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    {{else}}
+                        <p class="no-bookings">You have no bookings to display yet.</p>
+                    {{/if}}
+                </div>
+
+                {{else}}
+                <p>No profile information found. Please create a customer profile first.</p>
+                {{/if}}
+            </div>
+        </main>
+    </div>
+     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('dob');
+            if (dateInput.value) {
+                const date = new Date(dateInput.value);
+                const formattedDate = date.toISOString().split('T')[0];
+                dateInput.value = formattedDate;
+            }
+        });
+    </script>
+</body>
+</html>

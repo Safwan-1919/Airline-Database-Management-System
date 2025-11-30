@@ -1,0 +1,41 @@
+.history-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem;
+}
+
+.history-box {
+    background: rgba(255, 218, 218, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 2rem;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.history-h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.history-ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.history-li {
+    background: #f4f4f4;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+}
+
+.history-p {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #777;
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="/agent-dashboard.css">
+</head>
+<body>
+    {{>sidebar}}
+    <div class="main-content">
+        {{>header pageTitle="Agent Dashboard"}}
+        <main class="agent-dashboard-page">
+            <h1>Agent Chat Dashboard</h1>
+            <div class="chat-layout">
+                <div class="session-list">
+                    <h2>Waiting Customers</h2>
+                    <ul id="session-list-ul">
+                        <!-- Sessions will be populated by JS -->
+                    </ul>
+                </div>
+                <div class="chat-area">
+                    <div class="agent-action-tabs">
+                        <button class="tab-link active" data-tab="chat-panel">Chat</button>
+                        <button class="tab-link" data-tab="book-panel">Book Flight</button>
+                        <button class="tab-link" data-tab="cancel-panel">Cancel Flight</button>
+                    </div>
+                    <div id="chat-panel" class="tab-content active">
+                        <h2>Select a chat to begin</h2>
+                    </div>
+                    <div id="book-panel" class="tab-content">
+                        <!-- Booking form will be loaded here -->
+                        <p>Select a chat to access booking tools.</p>
+                    </div>
+                    <div id="cancel-panel" class="tab-content">
+                        <!-- Cancellation tools will be loaded here -->
+                        <p>Select a chat to access cancellation tools.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const AGENT_USER_ID = '{{userId}}';
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/agent-chat.js"></script>
+</body>
+</html>

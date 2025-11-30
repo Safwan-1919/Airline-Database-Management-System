@@ -1,12 +1,18 @@
-<div class="header-main">
+<div class="header-main" id="main-header">
     <div class="header-title">
         <h2>{{pageTitle}}</h2>   
     </div>
     <div class="search-info">
-        <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search">
-        </div>
-        <img src="/images/user.jpg" alt="user">
+        <form action="/search" method="GET" class="search-box">
+            <select name="type" class="search-type">
+                <option value="customer">Customer</option>
+                <option value="flight">Flight</option>
+            </select>
+            <input type="text" name="query" placeholder="Search">
+            <button type="submit" style="border:none; background:transparent; cursor:pointer;"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+        <a href="/profile" class="profile-link">
+            <img src="/images/user.jpg" alt="user" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
+        </a>
     </div>
 </div>

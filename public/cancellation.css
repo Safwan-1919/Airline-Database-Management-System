@@ -1,64 +1,80 @@
-.header-main {
+.cancellation-page {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #f4f4f4;
-    border-bottom: 1px solid #ddd;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem 1rem;
 }
-.header-title h2 {
-    margin: 0;
-}
-.search-info {
-    display: flex;
-    align-items: center;
-}
-.search-box {
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-}
-.search-box input {
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-.main-content h1 {
-    margin-top: 0;
-}
-.main-content form {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-.main-content form input,
-.main-content form button {
+
+.cancellation-box {
+    background: rgba(255, 218, 218, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 2rem;
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
-.main-content form button {
-    background-color: #E84545;
-    color: white;
+
+.cancellation-box h1, .cancellation-box h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.cancellation-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.cancellation-box input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.cancellation-box input:focus {
+    outline: none;
+    border-color: #E84545;
+    box-shadow: 0 0 5px rgba(232, 69, 69, 0.5);
+}
+
+.cancellation-box button {
+    padding: 0.9rem;
     border: none;
-    cursor: pointer;
-}
-.main-content form button:hover {
+    border-radius: 6px;
     background-color: #E84545;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s ease;
 }
+
+.cancellation-box button:hover {
+    background-color: #d43535;
+}
+
 #bookings-list {
     margin-top: 20px;
 }
-#bookings-list div {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
+
+#bookings-list h3 {
+    text-align: center;
+    margin-bottom: 1rem;
 }
+
+#bookings-list div {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
 #bookings-list button {
     background-color: #dc3545;
     color: white;
@@ -66,7 +82,9 @@
     padding: 10px;
     border-radius: 4px;
     cursor: pointer;
+    float: right;
 }
+
 #bookings-list button:hover {
     background-color: #c82333;
 }

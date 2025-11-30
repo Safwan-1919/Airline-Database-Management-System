@@ -80,21 +80,19 @@
                     <fieldset>
                         <legend>Flight Details</legend>
 
-                        <label for="from">From:</label>
-                        <select id="from" name="from" required>
-                            <option value="">Select a country</option>
-                            {{#each countries}}
-                                <option value="{{this}}">{{this}}</option>
-                            {{/each}}
-                        </select>
+                        <div class="autocomplete-container">
+                            <label for="from-text">From:</label>
+                            <input type="text" id="from-text" name="from-text" placeholder="Type to search for an airport..." required>
+                            <input type="hidden" id="from" name="from">
+                            <div class="autocomplete-results" id="from-results"></div>
+                        </div>
 
-                        <label for="to">To:</label>
-                        <select id="to" name="to" required>
-                            <option value="">Select a country</option>
-                            {{#each countries}}
-                                <option value="{{this}}">{{this}}</option>
-                            {{/each}}
-                        </select>
+                        <div class="autocomplete-container">
+                            <label for="to-text">To:</label>
+                            <input type="text" id="to-text" name="to-text" placeholder="Type to search for an airport..." required>
+                            <input type="hidden" id="to" name="to">
+                            <div class="autocomplete-results" id="to-results"></div>
+                        </div>
 
                         <button type="button" id="check-flights">Check Available Flights</button>
                         
@@ -118,8 +116,11 @@
                         <label for="arrivalDate">Arrival Date:</label>
                         <input type="date" id="arrivalDate" name="arrivalDate" required>
 
-                        <label for="seatNumber">Seat Number:</label>
-                        <input type="text" id="seatNumber" name="seatNumber" required>
+                        <label for="seatNumber">Seat:</label>
+                        <button type="button" id="select-seat-btn" disabled>Select Seat</button>
+                        <input type="hidden" id="seatNumber" name="seatNumber" required>
+                        <div id="seat-map-container"></div>
+                        <p>Selected Seat: <span id="selected-seat-display">None</span></p>
 
                         <label for="class">Class:</label>
                         <select id="class" name="class" required>
@@ -152,20 +153,241 @@
 
     </div>
     <script>
+        const allAirports = {{{JSONstringify airports}}};
+
+
+        // Debounce function to limit processing while typing
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        // --- Autocomplete Logic ---
+        function setupAutocomplete(textInputId, hiddenInputId, resultsContainerId) {
+            const textInput = document.getElementById(textInputId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+            const resultsContainer = document.getElementById(resultsContainerId);
+
+            const handleInput = (event) => {
+                const query = event.target.value.toLowerCase();
+                resultsContainer.innerHTML = '';
+
+                if (query.length < 2) {
+                    resultsContainer.style.display = 'none';
+                    return;
+                }
+
+                const filteredAirports = allAirports.filter(airport => 
+                    (airport.name && airport.name.toLowerCase().includes(query)) || 
+                    (airport.iata && airport.iata.toLowerCase().includes(query))
+                ).slice(0, 10); // Show top 10 results
+                
+                console.log('Filtered airports:', filteredAirports); // DEBUG
+
+                if (filteredAirports.length > 0) {
+                    filteredAirports.forEach(airport => {
+                        const item = document.createElement('div');
+                        item.className = 'autocomplete-item';
+                        item.textContent = `${airport.name} (${airport.iata})`;
+                        item.addEventListener('click', () => {
+                            textInput.value = `${airport.name} (${airport.iata})`;
+                            hiddenInput.value = airport.iata;
+                            resultsContainer.innerHTML = '';
+                            resultsContainer.style.display = 'none';
+                        });
+                        resultsContainer.appendChild(item);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            };
+            
+            textInput.addEventListener('input', debounce(handleInput, 100));
+
+            // Hide results when clicking elsewhere
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.autocomplete-container')) {
+                    resultsContainer.innerHTML = '';
+                    resultsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // --- Seat Map Logic ---
+        const selectSeatBtn = document.getElementById('select-seat-btn');
+        const seatMapContainer = document.getElementById('seat-map-container');
+        const flightNumberInput = document.getElementById('flightNumber');
+        const hiddenSeatNumberInput = document.getElementById('seatNumber');
+        const selectedSeatDisplay = document.getElementById('selected-seat-display');
+
+        function renderSeatMap(bookedSeats) {
+            seatMapContainer.innerHTML = '';
+            seatMapContainer.style.display = 'block';
+            const seatMap = document.createElement('div');
+            seatMap.className = 'seat-map';
+            const rows = 10;
+            const seatsPerRow = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+            for (let i = 1; i <= rows; i++) {
+                const row = document.createElement('div');
+                row.className = 'seat-row';
+                seatsPerRow.forEach((seatLetter, index) => {
+                    if (index === 3) {
+                        const aisle = document.createElement('div');
+                        aisle.className = 'seat aisle';
+                        row.appendChild(aisle);
+                    }
+                    const seatId = `${i}${seatLetter}`;
+                    const seat = document.createElement('div');
+                    seat.id = `seat-${seatId}`;
+                    seat.textContent = seatId;
+                    
+                    if (bookedSeats.includes(seatId)) {
+                        seat.className = 'seat booked';
+                    } else {
+                        seat.className = 'seat available';
+                        seat.addEventListener('click', () => {
+                            const currentlySelected = document.querySelector('.seat.selected');
+                            if (currentlySelected) {
+                                currentlySelected.classList.remove('selected');
+                            }
+                            seat.classList.add('selected');
+                            hiddenSeatNumberInput.value = seatId;
+                            selectedSeatDisplay.textContent = seatId;
+                        });
+                    }
+                    row.appendChild(seat);
+                });
+                seatMap.appendChild(row);
+            }
+            seatMapContainer.appendChild(seatMap);
+        }
+
+        if (selectSeatBtn) {
+            selectSeatBtn.addEventListener('click', async () => {
+                const flightNumber = flightNumberInput.value;
+                if (!flightNumber) {
+                    alert('Please select a flight first.');
+                    return;
+                }
+                try {
+                    const response = await fetch(`/api/flights/${flightNumber}/seats`);
+                    const bookedSeats = await response.json();
+                    renderSeatMap(bookedSeats);
+                } catch (error) {
+                    console.error('Error fetching booked seats:', error);
+                    alert('Could not load seat information.');
+                }
+            });
+        }
+
+        // --- Page Setup and Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if(document.getElementById('from-text')) {
+                setupAutocomplete('from-text', 'from', 'from-results');
+                setupAutocomplete('to-text', 'to', 'to-results');
+            }
+
+            if(document.getElementById('check-flights')) {
+                document.getElementById('check-flights').addEventListener('click', async () => {
+                    const from = document.getElementById('from').value;
+                    const to = document.getElementById('to').value;
+                    const flightsContainer = document.getElementById('flights-container');
+                    const availableFlights = document.getElementById('available-flights');
+                    availableFlights.innerHTML = '';
+                    flightsContainer.style.display = 'none';
+
+                    if (!from || !to) {
+                        alert('Please select both departure and destination airports.');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/available-flights?from=${from}&to=${to}`);
+                        if (!response.ok) {
+                            const errorResult = await response.json().catch(() => ({ message: 'No flights found for this route.' }));
+                            alert(errorResult.message);
+                            return;
+                        }
+                        const flights = await response.json();
+
+                        if (flights.length === 0) {
+                             alert('No flights available for the selected route.');
+                             return;
+                        }
+
+                        flights.forEach(flight => {
+                            const flightOption = document.createElement('div');
+                            flightOption.className = 'flight-option';
+                            flightOption.textContent = `Flight ${flight.flightNumber}: ${flight.from} -> ${flight.to}`;
+                            flightOption.addEventListener('click', () => {
+                                flightNumberInput.value = flight.flightNumber;
+                                document.getElementById('departure').value = flight.from;
+                                document.getElementById('arrival').value = flight.to;
+                                document.getElementById('departureDate').value = flight.date.split('T')[0];
+
+                                selectSeatBtn.disabled = false;
+                                seatMapContainer.style.display = 'none';
+                                hiddenSeatNumberInput.value = '';
+                                selectedSeatDisplay.textContent = 'None';
+                                
+                                const departureDate = new Date(flight.date);
+                                const arrivalDate = new Date(departureDate.getTime() + 4 * 60 * 60 * 1000); // 4 hour flight
+                                document.getElementById('arrivalDate').value = arrivalDate.toISOString().split('T')[0];
+                            });
+                            availableFlights.appendChild(flightOption);
+                        });
+                        flightsContainer.style.display = 'block';
+                    } catch (error) {
+                        console.error('Error fetching available flights:', error);
+                        alert('An error occurred while fetching available flights.');
+                    }
+                });
+            }
+
+            if (document.getElementById('booking-form')) {
+                document.getElementById('booking-form').addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const formData = new FormData(event.target);
+                    const formProps = Object.fromEntries(formData);
+
+                    if (!formProps.seatNumber) {
+                        alert('Please select a seat before booking.');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/booking', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formProps),
+                        });
+                        const result = await response.json();
+                        showModal(result.message, response.ok ? showFindCustomerSection : null);
+                    } catch (error) {
+                        console.error('Error submitting booking:', error);
+                        showModal('An error occurred while booking your flight.');
+                    }
+                });
+            }
+        });
+
         // Function to display modal with message
         function showModal(message, callback) {
             const modal = document.getElementById("successModal");
             const modalMessage = document.getElementById("modalMessage");
             const span = document.getElementsByClassName("close")[0];
-            
             modalMessage.textContent = message;
             modal.style.display = "block";
-
             span.onclick = function() {
                 modal.style.display = "none";
                 if (callback) callback();
             }
-
             window.onclick = function(event) {
                 if (event.target == modal) {
                     modal.style.display = "none";
@@ -175,91 +397,17 @@
         }
 
         function showFindCustomerSection() {
-            document.getElementById('booking-box').innerHTML = `
-                <h3>Find Customer</h3>
-                <form action="/fetch-customer" method="POST">
-                    <label for="identifier">Customer ID or Aadhar Number:</label>
-                    <input type="text" id="identifier" name="identifier" required>
-                    <button type="submit">Fetch Customer</button>
-                </form>
-            `;
+            if (document.getElementById('booking-box')) {
+                document.getElementById('booking-box').innerHTML = `
+                    <h3>Find Customer</h3>
+                    <form action="/fetch-customer" method="POST">
+                        <label for="identifier">Customer ID or Aadhar Number:</label>
+                        <input type="text" id="identifier" name="identifier" required>
+                        <button type="submit">Fetch Customer</button>
+                    </form>
+                `;
+            }
         }
-
-        document.getElementById('check-flights').addEventListener('click', async () => {
-            const from = document.getElementById('from').value;
-            const to = document.getElementById('to').value;
-            const flightsContainer = document.getElementById('flights-container');
-            const availableFlights = document.getElementById('available-flights');
-            availableFlights.innerHTML = '';
-            flightsContainer.style.display = 'none';
-
-            if (!from || !to) {
-                alert('Please select both departure and destination countries.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/available-flights?from=${from}&to=${to}`);
-                const flights = await response.json();
-
-                if (response.status === 404) {
-                    alert(flights.message);
-                } else {
-                    flights.forEach(flight => {
-                        const flightOption = document.createElement('div');
-                        flightOption.className = 'flight-option';
-                        flightOption.textContent = `Flight ${flight.flightNumber}: ${flight.departure} - ${flight.arrival} on ${flight.date} (Seats available: ${flight.seatsAvailable})`;
-                        flightOption.addEventListener('click', () => {
-                            document.getElementById('flightNumber').value = flight.flightNumber;
-                            document.getElementById('departure').value = flight.departure;
-                            document.getElementById('arrival').value = flight.arrival;
-                            document.getElementById('departureDate').value = flight.date;
-                            // Automatically set arrival date based on departure date and flight duration
-                            const departureDate = new Date(flight.date);
-                            const flightDurationInHours = 4; // Example flight duration
-                            const arrivalDate = new Date(departureDate.getTime() + flightDurationInHours * 60 * 60 * 1000);
-                            
-                            const year = arrivalDate.getFullYear();
-                            const month = String(arrivalDate.getMonth() + 1).padStart(2, '0');
-                            const day = String(arrivalDate.getDate()).padStart(2, '0');
-                            
-                            document.getElementById('arrivalDate').value = `${year}-${month}-${day}`;
-                        });
-                        availableFlights.appendChild(flightOption);
-                    });
-                    flightsContainer.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error fetching available flights:', error);
-                alert('An error occurred while fetching available flights.');
-            }
-        });
-
-        document.getElementById('booking-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const formProps = Object.fromEntries(formData);
-
-            try {
-                const response = await fetch('/booking', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formProps),
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    showModal(result.message, showFindCustomerSection);
-                } else {
-                    showModal(result.message);
-                }
-            } catch (error) {
-                console.error('Error submitting booking:', error);
-                showModal('An error occurred while booking your flight.');
-            }
-        });
     </script>
 </body>
 </html>

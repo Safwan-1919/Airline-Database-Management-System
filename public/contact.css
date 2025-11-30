@@ -1,0 +1,115 @@
+.contact-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5rem 2rem;
+    background: linear-gradient(to bottom, #d68b8b, #fff);
+}
+
+.contact-box {
+    background: #fff;
+    padding: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto; /* Center the block element */
+}
+
+.contact-box h2 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.contact-box p {
+    margin-bottom: 2rem;
+    color: #666;
+}
+
+.contact-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    position: relative;
+    width: 100%;
+    margin: 25px 0;
+}
+
+.form-group label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #999;
+    pointer-events: none;
+    transition: all .5s ease;
+}
+
+.form-group input:focus~label,
+.form-group input:valid~label,
+.form-group textarea:focus~label,
+.form-group textarea:valid~label {
+    top: -5px;
+    font-size: 0.8rem;
+    background-color: white;
+    padding: 0 0.2rem;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #E84545;
+    box-shadow: 0 0 5px rgba(232, 69, 69, 0.5);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+button {
+    padding: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #E84545;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #d43535;
+}
+
+/* Style the placeholder text */
+input::placeholder,
+textarea::placeholder {
+    color: #999;
+    opacity: 1; /* Ensure it's visible by default */
+    transition: opacity 0.3s ease; /* Add a smooth transition */
+}
+
+/* Hide the placeholder on focus */
+input:focus::placeholder,
+textarea:focus::placeholder {
+    opacity: 0;
+}
