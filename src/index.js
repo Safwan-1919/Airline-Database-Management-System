@@ -334,7 +334,7 @@ app.get("/api/bookings-for-customer/:customerId", requireLogin, requireAgent, as
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // AI Setup
-const genAI = new GoogleGenerativeAI("AIzaSyDBP2H5tSq7qb-SxMTogqUpz9ibxpWbEaA");
+const genAI = new GoogleGenerativeAI("");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 const tools = [
